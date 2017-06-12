@@ -9,7 +9,7 @@ import java.util.List;
 import com.iheartradio.m3u8.data.Playlist;
 
 class ExtendedM3uWriter extends Writer {
-    private List<SectionWriter> mExtTagWriter = new ArrayList<SectionWriter>();
+    private final List<SectionWriter> mExtTagWriter = new ArrayList<SectionWriter>();
 
     public ExtendedM3uWriter(OutputStream outputStream, Encoding encoding) {
         super(outputStream, encoding);
@@ -17,6 +17,7 @@ class ExtendedM3uWriter extends Writer {
         putWriters(
                 ExtTagWriter.EXTM3U_HANDLER,
                 ExtTagWriter.EXT_X_VERSION_HANDLER,
+                ExtTagWriter.EXT_UNKNOWN_HANDLER,
                 MediaPlaylistTagWriter.EXT_X_PLAYLIST_TYPE,
                 MediaPlaylistTagWriter.EXT_X_TARGETDURATION,
                 MediaPlaylistTagWriter.EXT_X_START,

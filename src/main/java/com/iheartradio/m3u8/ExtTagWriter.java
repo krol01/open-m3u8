@@ -63,7 +63,7 @@ abstract class ExtTagWriter implements IExtTagWriter {
             List<String> unknownTags;
             if (playlist.hasMasterPlaylist() && playlist.getMasterPlaylist().hasUnknownTags()) {
                 unknownTags = playlist.getMasterPlaylist().getUnknownTags();
-            } else if (playlist.getMediaPlaylist().hasUnknownTags()) {
+            } else if (playlist.hasMediaPlaylist() && playlist.getMediaPlaylist().hasUnknownTags()) {
                 unknownTags = playlist.getMediaPlaylist().getUnknownTags();
             } else {
                 unknownTags = Collections.emptyList();
