@@ -34,6 +34,29 @@ public class MediaPlaylistLineParserTest extends LineParserStateTestCase {
         assertEquals(-1f, mParseState.getMedia().trackInfo.duration);
         assertEquals("TOP 100", mParseState.getMedia().trackInfo.title);
     }
+    
+    @Test
+    public void testEXT_X_BYTERANGE() throws Exception {
+        final IExtTagParser handler = MediaPlaylistLineParser.EXT_X_BYTE_RANGE;
+        final String tag = Constants.EXT_X_BYTE_RANGE_TAG;
+        String line = "#" + tag + ":999624@376";
+        
+        assertEquals(tag, handler.getTag());
+
+        handler.parse(line, mParseState);
+        assertEquals(999624, mParseState.getMedia().byteRange.getSubRangeLength());
+        assertTrue(mParseState.getMedia().byteRange.hasOffset());
+        assertEquals(Integer.valueOf(376), mParseState.getMedia().byteRange.getOffset());
+        
+        line = "#" + tag + ":999624";
+        handler.parse(line, mParseState);
+        assertEquals(999624, mParseState.getMedia().byteRange.getSubRangeLength());
+        assertFalse(mParseState.getMedia().byteRange.hasOffset());
+        assertEquals(null, mParseState.getMedia().byteRange.getOffset());
+        
+        line = "#" + tag + ":weird";
+        assertParseThrows(handler, line, ParseExceptionType.BAD_EXT_TAG_FORMAT);
+    }
 
     @Test
     public void testEXT_X_KEY() throws Exception {

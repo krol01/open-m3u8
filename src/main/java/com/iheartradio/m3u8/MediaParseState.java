@@ -3,6 +3,7 @@ package com.iheartradio.m3u8;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.iheartradio.m3u8.data.ByteRange;
 import com.iheartradio.m3u8.data.EncryptionData;
 import com.iheartradio.m3u8.data.MediaPlaylist;
 import com.iheartradio.m3u8.data.PlaylistType;
@@ -11,6 +12,7 @@ import com.iheartradio.m3u8.data.TrackData;
 import com.iheartradio.m3u8.data.TrackInfo;
 
 class MediaParseState implements PlaylistParseState<MediaPlaylist> {
+
     private List<String> mUnknownTags;
     private StartData mStartData;
 
@@ -21,6 +23,7 @@ class MediaParseState implements PlaylistParseState<MediaPlaylist> {
     public boolean isIframesOnly;
     public PlaylistType playlistType;
     public TrackInfo trackInfo;
+    public ByteRange byteRange;
     public EncryptionData encryptionData;
     public String programDateTime;
     public boolean endOfList;

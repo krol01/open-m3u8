@@ -18,9 +18,11 @@ class TrackLineParser implements LineParser {
                 .withEncryptionData(mediaState.encryptionData)
                 .withProgramDateTime(mediaState.programDateTime)
                 .withDiscontinuity(mediaState.hasDiscontinuity)
+                .withByteRange(mediaState.byteRange)
                 .build());
 
         mediaState.trackInfo = null;
+        mediaState.byteRange = null;
         mediaState.programDateTime = null;
         mediaState.hasDiscontinuity = false;
     }

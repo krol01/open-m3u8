@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import com.iheartradio.m3u8.data.ByteRange;
 import com.iheartradio.m3u8.data.EncryptionData;
 import com.iheartradio.m3u8.data.EncryptionData.Builder;
 import com.iheartradio.m3u8.data.EncryptionMethod;
@@ -14,6 +15,7 @@ import com.iheartradio.m3u8.data.StartData;
 import com.iheartradio.m3u8.data.TrackInfo;
 
 class MediaPlaylistLineParser implements LineParser {
+
     private final IExtTagParser tagParser;
     private final LineParser lineParser;
 
@@ -37,7 +39,6 @@ class MediaPlaylistLineParser implements LineParser {
     }
 
     // media playlist tags
-    
     static final IExtTagParser EXT_X_ENDLIST = new IExtTagParser() {
         private final LineParser lineParser = new MediaPlaylistLineParser(this);
 
@@ -59,7 +60,7 @@ class MediaPlaylistLineParser implements LineParser {
             state.getMedia().endOfList = true;
         }
     };
-    
+
     static final IExtTagParser EXT_X_I_FRAMES_ONLY = new IExtTagParser() {
         private final LineParser lineParser = new MediaPlaylistLineParser(this);
 
@@ -76,17 +77,17 @@ class MediaPlaylistLineParser implements LineParser {
         @Override
         public void parse(String line, ParseState state) throws ParseException {
             lineParser.parse(line, state);
-            
+
             ParseUtil.match(Constants.EXT_X_I_FRAMES_ONLY_PATTERN, line, getTag());
-            
+
             if (state.getCompatibilityVersion() < 4) {
                 throw ParseException.create(ParseExceptionType.REQUIRES_PROTOCOL_VERSION_4_OR_HIGHER, getTag());
             }
-            
+
             state.setIsIframesOnly();
         }
     };
-    
+
     static final IExtTagParser EXT_X_PLAYLIST_TYPE = new IExtTagParser() {
         private final LineParser lineParser = new MediaPlaylistLineParser(this);
 
@@ -99,7 +100,7 @@ class MediaPlaylistLineParser implements LineParser {
         public boolean hasData() {
             return true;
         }
-        
+
         @Override
         public void parse(String line, ParseState state) throws ParseException {
             lineParser.parse(line, state);
@@ -113,7 +114,6 @@ class MediaPlaylistLineParser implements LineParser {
             state.getMedia().playlistType = ParseUtil.parseEnum(matcher.group(1), PlaylistType.class, getTag());
         }
     };
-    
 
     static final IExtTagParser EXT_X_PROGRAM_DATE_TIME = new IExtTagParser() {
         private final LineParser lineParser = new MediaPlaylistLineParser(this);
@@ -127,7 +127,7 @@ class MediaPlaylistLineParser implements LineParser {
         public boolean hasData() {
             return true;
         }
-        
+
         @Override
         public void parse(String line, ParseState state) throws ParseException {
             lineParser.parse(line, state);
@@ -138,14 +138,14 @@ class MediaPlaylistLineParser implements LineParser {
                 throw ParseException.create(ParseExceptionType.MULTIPLE_EXT_TAG_INSTANCES, getTag(), line);
             }
 
-            state.getMedia().programDateTime = ParseUtil.parseDateTime(line,getTag());
+            state.getMedia().programDateTime = ParseUtil.parseDateTime(line, getTag());
         }
     };
-    
+
     static final IExtTagParser EXT_X_START = new IExtTagParser() {
         private final LineParser lineParser = new MediaPlaylistLineParser(this);
         private final Map<String, AttributeParser<StartData.Builder>> HANDLERS = new HashMap<>();
-        
+
         {
             HANDLERS.put(Constants.TIME_OFFSET, new AttributeParser<StartData.Builder>() {
                 @Override
@@ -153,7 +153,7 @@ class MediaPlaylistLineParser implements LineParser {
                     builder.withTimeOffset(ParseUtil.parseFloat(attribute.value, getTag()));
                 }
             });
-            
+
             HANDLERS.put(Constants.PRECISE, new AttributeParser<StartData.Builder>() {
                 @Override
                 public void parse(Attribute attribute, StartData.Builder builder, ParseState state) throws ParseException {
@@ -171,7 +171,7 @@ class MediaPlaylistLineParser implements LineParser {
         public boolean hasData() {
             return true;
         }
-        
+
         @Override
         public void parse(String line, ParseState state) throws ParseException {
             lineParser.parse(line, state);
@@ -183,7 +183,6 @@ class MediaPlaylistLineParser implements LineParser {
             state.getMedia().setStartData(startData);
         }
     };
-    
 
     static final IExtTagParser EXT_X_TARGETDURATION = new IExtTagParser() {
         private final LineParser lineParser = new MediaPlaylistLineParser(this);
@@ -261,7 +260,6 @@ class MediaPlaylistLineParser implements LineParser {
     };
 
     // media segment tags
-
     static final IExtTagParser EXTINF = new IExtTagParser() {
         private final LineParser lineParser = new MediaPlaylistLineParser(this);
 
@@ -282,6 +280,31 @@ class MediaPlaylistLineParser implements LineParser {
             final Matcher matcher = ParseUtil.match(Constants.EXTINF_PATTERN, line, getTag());
 
             state.getMedia().trackInfo = new TrackInfo(ParseUtil.parseFloat(matcher.group(1), getTag()), matcher.group(2));
+        }
+    };
+
+    static final IExtTagParser EXT_X_BYTE_RANGE = new IExtTagParser() {
+        private final LineParser lineParser = new MediaPlaylistLineParser(this);
+
+        @Override
+        public String getTag() {
+            return Constants.EXT_X_BYTE_RANGE_TAG;
+        }
+
+        @Override
+        public boolean hasData() {
+            return true;
+        }
+
+        @Override
+        public void parse(String line, ParseState state) throws ParseException {
+            lineParser.parse(line, state);
+            final Matcher matcher = ParseUtil.match(Constants.EXT_X_BYTE_RANGE_PATTERN, line, getTag());
+
+            if (matcher.groupCount() == 3) {
+                String offset = matcher.group(3);
+                state.getMedia().byteRange = new ByteRange(Integer.parseInt(matcher.group(1)), offset == null ? null : Integer.parseInt(offset));
+            }
         }
     };
 
@@ -336,8 +359,8 @@ class MediaPlaylistLineParser implements LineParser {
                 public void parse(Attribute attribute, Builder builder, ParseState state) throws ParseException {
                     final List<Byte> initializationVector = ParseUtil.parseHexadecimal(attribute.value, getTag());
 
-                    if ((initializationVector.size() != Constants.IV_SIZE) && 
-                        (initializationVector.size() != Constants.IV_SIZE_ALTERNATIVE)) {
+                    if ((initializationVector.size() != Constants.IV_SIZE)
+                            && (initializationVector.size() != Constants.IV_SIZE_ALTERNATIVE)) {
                         throw ParseException.create(ParseExceptionType.INVALID_IV_SIZE, getTag(), attribute.toString());
                     }
 
@@ -365,7 +388,7 @@ class MediaPlaylistLineParser implements LineParser {
                             throw ParseException.create(ParseExceptionType.INVALID_KEY_FORMAT_VERSIONS, getTag(), attribute.toString());
                         }
                     }
-                    
+
                     builder.withKeyFormatVersions(versions);
                 }
             });
@@ -380,7 +403,7 @@ class MediaPlaylistLineParser implements LineParser {
         public boolean hasData() {
             return true;
         }
-        
+
         @Override
         public void parse(String line, ParseState state) throws ParseException {
             lineParser.parse(line, state);

@@ -8,13 +8,15 @@ public class TrackData {
     private final EncryptionData mEncryptionData;
     private final String mProgramDateTime;
     private final boolean mHasDiscontinuity;
+    private final ByteRange mByteRange;
 
-    private TrackData(String uri, TrackInfo trackInfo, EncryptionData encryptionData, String programDateTime, boolean hasDiscontinuity) {
+    private TrackData(String uri, TrackInfo trackInfo, EncryptionData encryptionData, String programDateTime, boolean hasDiscontinuity, ByteRange byteRange) {
         mUri = uri;
         mTrackInfo = trackInfo;
         mEncryptionData = encryptionData;
         mProgramDateTime = programDateTime;
         mHasDiscontinuity = hasDiscontinuity;
+        mByteRange = byteRange;
     }
 
     public String getUri() {
@@ -42,7 +44,7 @@ public class TrackData {
     public boolean hasProgramDateTime() {
         return mProgramDateTime != null && mProgramDateTime.length() > 0;
     }
-
+    
     public String getProgramDateTime() {
         return mProgramDateTime;
     }
@@ -51,17 +53,25 @@ public class TrackData {
         return mHasDiscontinuity;
     }
 
+    public boolean hasByteRange() {
+        return mByteRange != null;
+    }
+
+    public ByteRange getByteRange() {
+        return mByteRange;
+    }    
+    
     public EncryptionData getEncryptionData() {
         return mEncryptionData;
     }
 
     public Builder buildUpon() {
-        return new Builder(getUri(), mTrackInfo, mEncryptionData, mHasDiscontinuity);
+        return new Builder(getUri(), mTrackInfo, mEncryptionData, mHasDiscontinuity, mProgramDateTime, mByteRange);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mUri, mEncryptionData, mTrackInfo, mHasDiscontinuity);
+        return Objects.hash(mUri, mEncryptionData, mTrackInfo, mHasDiscontinuity, mProgramDateTime, mByteRange);
     }
 
     @Override
@@ -76,7 +86,8 @@ public class TrackData {
                Objects.equals(mTrackInfo, other.mTrackInfo) &&
                Objects.equals(mEncryptionData, other.mEncryptionData) &&
                Objects.equals(mProgramDateTime, other.mProgramDateTime) &&
-               Objects.equals(mHasDiscontinuity, other.mHasDiscontinuity);
+               Objects.equals(mHasDiscontinuity, other.mHasDiscontinuity) &&
+               Objects.equals(mByteRange, other.mByteRange);
     }
 
     @Override
@@ -88,6 +99,7 @@ public class TrackData {
                 .append(" mEncryptionData=").append(mEncryptionData)
                 .append(" mProgramDateTime=").append(mProgramDateTime)
                 .append(" mHasDiscontinuity=").append(mHasDiscontinuity)
+                .append(" mByteRange=").append(mByteRange)
                 .append(")")
                 .toString();
     }
@@ -98,15 +110,18 @@ public class TrackData {
         private EncryptionData mEncryptionData;
         private String mProgramDateTime;
         private boolean mHasDiscontinuity;
+        private ByteRange mByteRange;
 
         public Builder() {
         }
 
-        private Builder(String uri, TrackInfo trackInfo, EncryptionData encryptionData, boolean hasDiscontinuity) {
+        private Builder(String uri, TrackInfo trackInfo, EncryptionData encryptionData, boolean hasDiscontinuity, String programDateTime, ByteRange byteRange) {
             mUri = uri;
             mTrackInfo = trackInfo;
             mEncryptionData = encryptionData;
             mHasDiscontinuity = hasDiscontinuity;
+            mProgramDateTime = programDateTime;
+            mByteRange = byteRange;
         }
 
         public Builder withUri(String url) {
@@ -133,9 +148,14 @@ public class TrackData {
             mHasDiscontinuity = hasDiscontinuity;
             return this;
         }
+        
+        public Builder withByteRange(ByteRange byteRange) {
+            mByteRange = byteRange;
+            return this;
+        }
 
         public TrackData build() {
-            return new TrackData(mUri, mTrackInfo, mEncryptionData, mProgramDateTime, mHasDiscontinuity);
+            return new TrackData(mUri, mTrackInfo, mEncryptionData, mProgramDateTime, mHasDiscontinuity, mByteRange);
         }
     }
 }

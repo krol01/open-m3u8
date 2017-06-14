@@ -173,4 +173,12 @@ public class PlaylistParserWriterTest {
         System.out.println(sPlaylist);
     }
     
+    @Test
+    public void byteRangePlaylist() throws IOException, ParseException, PlaylistException {
+        Playlist playlist = readPlaylist("byteRangeMediaPlaylist.m3u8");
+        String sPlaylist = writePlaylist(playlist);
+        System.out.println("***************");
+        System.out.println(sPlaylist);
+    }
+    
 }
