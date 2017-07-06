@@ -78,7 +78,7 @@ public class MasterPlaylist {
                 .append(" mIFramePlaylists=").append(mIFramePlaylists.toString())
                 .append(" mMediaData=").append(mMediaData.toString())
                 .append(" mUnknownTags=").append(mUnknownTags.toString())
-                .append(" mStartData=").append(mStartData.toString())
+                .append(" mStartData=").append(hasStartData() ? mStartData.toString() : null)
                 .append(")")
                 .toString();
     }
