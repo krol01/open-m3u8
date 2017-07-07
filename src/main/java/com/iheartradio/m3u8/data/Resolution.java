@@ -27,4 +27,10 @@ public class Resolution {
         return width == other.width &&
                height == other.height;
     }
+
+    @Override
+    public String toString() {
+        return "Resolution{" + width + "x" + height + '}';
+    }
+    
 }
